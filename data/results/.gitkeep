@@ -1,0 +1,4 @@
+# Arama Sonuçları
+# LBS sistem analiz ve arama sonuçları bu klasörde JSON formatında saklanır
+# Benzerlik skorları, eşleşmeler ve detaylı raporlar içerir
+# Otomatik olarak main.py ve arama modülleri tarafından oluşturulur

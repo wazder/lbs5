@@ -1,0 +1,75 @@
+{
+  "analysis": {
+    "mode": "detailed",
+    "color": {
+      "num_clusters": 5,
+      "color_spaces": ["RGB", "HSV", "LAB"]
+    },
+    "shape": {
+      "wheel_detection_enabled": true,
+      "handle_detection_enabled": true,
+      "cropped_mode": true
+    },
+    "texture": {
+      "lbp_radius": 3,
+      "lbp_n_points": 24,
+      "glcm_enabled": true,
+      "pattern_detection": true
+    },
+    "features": {
+      "sift_features": 50,
+      "use_global_embedding": true,
+      "orb_fallback": true
+    }
+  },
+  "masking": {
+    "enabled": true,
+    "sam_config": {
+      "model_type": "vit_h",
+      "device": "auto",
+      "confidence_threshold": 0.5
+    },
+    "fallback_methods": {
+      "rembg": true,
+      "simple_edge": true
+    },
+    "output": {
+      "save_masks": true,
+      "quality": 95,
+      "background_color": [255, 255, 255]
+    }
+  },
+  "processing": {
+    "input_dir": "data/input",
+    "output_dir": "data/input-masked",
+    "mask_dir": "data/masks",
+    "gallery_dir": "data/gallery",
+    "results_dir": "data/results",
+    "supported_formats": [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".heic", ".heif"],
+    "max_image_size": [1920, 1080],
+    "resize_method": "maintain_aspect"
+  },
+  "search": {
+    "similarity_threshold": 0.7,
+    "max_results": 10,
+    "group_similar": true,
+    "group_threshold": 0.85,
+    "weights": {
+      "color": 0.4,
+      "shape": 0.3,
+      "texture": 0.2,
+      "sift": 0.1
+    }
+  },
+  "performance": {
+    "parallel_processing": true,
+    "max_workers": 4,
+    "memory_limit_mb": 2048,
+    "gpu_acceleration": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/lbs.log",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}

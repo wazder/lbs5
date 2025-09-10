@@ -1,0 +1,3 @@
+"""
+Analiz modülleri paketi
+"""

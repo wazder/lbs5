@@ -1,0 +1,4 @@
+# Maskelenmiş Bagaj Fotoğrafları 
+# SAM sistemi ile arka planı kaldırılmış bagaj fotoğrafları
+# Bu klasördeki temizlenmiş fotoğraflar analiz için kullanılır
+# Otomatik olarak scripts/mask_luggage.py tarafından oluşturulur

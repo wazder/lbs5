@@ -1,0 +1,4 @@
+# Sorgu Bagaj Fotoğrafları
+# Kayıp bagaj araması için kullanılacak sorgu fotoğraflarını yükleyin
+# Bu fotoğraflar gallery/ klasöründeki referans bagajlarla karşılaştırılır
+# Desteklenen formatlar: JPG, PNG, HEIC, HEIF, BMP, TIFF

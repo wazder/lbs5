@@ -1,0 +1,3 @@
+"""
+Arama modülleri paketi
+"""
