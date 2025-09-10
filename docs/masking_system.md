@@ -1,4 +1,4 @@
-# LBS Maskeleme Sistemi Dokümantasyonu
+ # LBS Maskeleme Sistemi Dokümantasyonu
 
 ## Genel Bakış
 LBS5 maskeleme sistemi, bagaj fotoğraflarından arka planı otomatik olarak kaldıran gelişmiş bir AI sistemidir. SAM (Segment Anything Model) tabanlı olarak çalışır ve fallback yöntemler sunar.

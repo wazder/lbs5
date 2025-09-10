@@ -70,7 +70,7 @@ class SAMDetector:
     
     def detect_luggage(self, 
                       image: np.ndarray,
-                      confidence_threshold: float = 0.5) -> Optional[np.ndarray]:
+                      confidence_threshold: float = 0.3) -> Optional[np.ndarray]:
         """
         Resimde bagaj tespiti yap
         
@@ -91,27 +91,46 @@ class SAMDetector:
             # SAM için resmi ayarla
             self.predictor.set_image(rgb_image)
             
-            # Resmin merkezi noktasını bagaj olarak işaretle
             h, w = image.shape[:2]
-            center_point = np.array([[w//2, h//2]])
-            center_label = np.array([1])  # Pozitif nokta
             
-            # Maskeyi tahmin et
+            # Merkez + köşe noktaları (valizin farklı bölgeleri)
+            points = np.array([
+                [w//2, h//2],      # Merkez
+                [w//3, h//3],      # Sol üst
+                [2*w//3, h//3],    # Sağ üst  
+                [w//3, 2*h//3],    # Sol alt
+                [2*w//3, 2*h//3],  # Sağ alt
+            ])
+            
+            # Tüm noktalar pozitif (valiz içi)
+            labels = np.array([1, 1, 1, 1, 1])
+            
+            # Maskeyi tahmin et (çoklu nokta)
             masks, scores, _ = self.predictor.predict(
-                point_coords=center_point,
-                point_labels=center_label,
+                point_coords=points,
+                point_labels=labels,
                 multimask_output=True
             )
             
-            # En iyi maskeyi seç
-            best_mask_idx = np.argmax(scores)
-            best_mask = masks[best_mask_idx]
-            
-            if scores[best_mask_idx] >= confidence_threshold:
+            # En iyi maskeyi seç veya kombinasyon kullan
+            if len(masks) > 0:
+                # Tüm maskeleri birleştir (valiz için daha kapsamlı)
+                combined_mask = np.zeros_like(masks[0], dtype=bool)
+                for i, (mask, score) in enumerate(zip(masks, scores)):
+                    if score >= confidence_threshold:
+                        combined_mask = combined_mask | mask
+                
+                # Eğer hiç mask yoksa en iyisini al
+                if not combined_mask.any():
+                    best_mask_idx = np.argmax(scores)
+                    combined_mask = masks[best_mask_idx]
+                    if scores[best_mask_idx] < confidence_threshold:
+                        self.logger.warning(f"SAM güven skoru düşük ({scores[best_mask_idx]:.3f}), fallback kullanılıyor")
+                        return self._fallback_detection(image)
+                
                 # Binary mask olarak döndür
-                return (best_mask * 255).astype(np.uint8)
+                return (combined_mask * 255).astype(np.uint8)
             else:
-                self.logger.warning("SAM güven skoru düşük, fallback kullanılıyor")
                 return self._fallback_detection(image)
                 
         except Exception as e:
@@ -155,34 +174,75 @@ class SAMDetector:
             return self._simple_detection(image)
     
     def _simple_detection(self, image: np.ndarray) -> np.ndarray:
+    def _simple_detection(self, image: np.ndarray) -> np.ndarray:
         """
-        Basit kenar tabanlı tespit
+        Basit tespit
         """
         # Gri tonlamalı resme çevir
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
-        # Gürültüyü azalt
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # Ön işleme - valiz için optimize
+        # 1. Gürültü azaltma
+        denoised = cv2.medianBlur(gray, 5)
         
-        # Kenar tespiti
-        edges = cv2.Canny(blurred, 50, 150)
+        # 2. Kontrast artırma (valiz kenarları için)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+        enhanced = clahe.apply(denoised)
         
-        # Morfolojik işlemler
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        # 3. Çoklu eşik değer ile kenar tespiti
+        edges1 = cv2.Canny(enhanced, 30, 100)  # Düşük eşik
+        edges2 = cv2.Canny(enhanced, 50, 150)  # Orta eşik
+        edges3 = cv2.Canny(enhanced, 80, 200)  # Yüksek eşik
+        
+        # Kenarları birleştir
+        combined_edges = cv2.bitwise_or(edges1, cv2.bitwise_or(edges2, edges3))
+        
+        # Morfolojik işlemler - valiz şekli için
+        # Dikdörtgen kernel (valizler genelde dikdörtgen)
+        kernel_rect = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        
+        # Önce kapatma sonra açma
+        closed = cv2.morphologyEx(combined_edges, cv2.MORPH_CLOSE, kernel_rect)
+        opened = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel_ellipse)
         
         # Konturları bul
-        contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(opened, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if contours:
-            # En büyük konturu seç
-            largest_contour = max(contours, key=cv2.contourArea)
+            # Valiz kriterleri ile filtreleme
+            valid_contours = []
+            h, w = image.shape[:2]
+            min_area = (w * h) * 0.05  # Minimum %5 alan
+            max_area = (w * h) * 0.9   # Maksimum %90 alan
             
-            # Mask oluştur
-            mask = np.zeros(gray.shape, dtype=np.uint8)
-            cv2.fillPoly(mask, [largest_contour], 255)
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                if min_area < area < max_area:
+                    # Aspect ratio kontrolü (valizler genelde 1:1 - 2:1 arası)
+                    x, y, cw, ch = cv2.boundingRect(contour)
+                    aspect_ratio = max(cw, ch) / min(cw, ch)
+                    if aspect_ratio < 3.0:  # Çok uzun değil
+                        valid_contours.append((contour, area))
             
-            return mask
-        else:
-            # Hiç kontur bulunamazsa tüm resmi bagaj olarak kabul et
-            return np.full(gray.shape, 255, dtype=np.uint8)
+            if valid_contours:
+                # En büyük geçerli konturu seç
+                largest_contour = max(valid_contours, key=lambda x: x[1])[0]
+                
+                # Mask oluştur
+                mask = np.zeros(gray.shape, dtype=np.uint8)
+                cv2.fillPoly(mask, [largest_contour], 255)
+                
+                return mask
+        
+        # Hiç geçerli kontur bulunamazsa, merkezi bölgeyi valiz olarak kabul et
+        h, w = gray.shape
+        mask = np.zeros((h, w), dtype=np.uint8)
+        
+        # Merkezi %60'lık alanı valiz olarak işaretle
+        center_h, center_w = h // 2, w // 2
+        margin_h, margin_w = int(h * 0.3), int(w * 0.3)
+        
+        mask[margin_h:h-margin_h, margin_w:w-margin_w] = 255
+        
+        return mask

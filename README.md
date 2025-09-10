@@ -4,13 +4,13 @@
 Lost Baggage System (LBS), havaalanları ve güvenlik birimleri için geliştirilmiş, yapay zeka destekli bir bagaj tanımlama ve eşleştirme sistemidir. Bu sistem, kayıp veya sahipsiz bagajların fotoğraflarını analiz ederek, önceden oluşturulmuş bir veri tabanı ile karşılaştırma yaparak eşleşmeleri bulur.
 
 ## Ana Özellikler
-- 🎨 **Renk Analizi**: K-means kümeleme ile dominant renk çıkarımı
-- 📐 **Şekil ve Boyut Analizi**: Bagaj tipi, boyut sınıfı, tekerlek sayısı tespiti
-- 🔍 **Görsel Özellik Çıkarımı**: SIFT keypoints, texture patterns, global embedding
-- 🔧 **Aksesuar Tespiti**: Fermuar, kilit, dış cep analizi
-- 🚀 **Gelişmiş Arama**: Global search, group-based search, multi-image query
-- 📱 **HEIC Desteği**: iPhone ve modern cihazlardan HEIC/HEIF formatı desteği
-- 🤖 **AI Maskeleme**: SAM (Segment Anything Model) ile otomatik bagaj tespiti ve arka plan kaldırma
+- **Renk Analizi**: K-means kümeleme ile dominant renk çıkarımı
+- **Şekil ve Boyut Analizi**: Bagaj tipi, boyut sınıfı, tekerlek sayısı tespiti
+- **Görsel Özellik Çıkarımı**: SIFT keypoints, texture patterns, global embedding
+- **Aksesuar Tespiti**: Fermuar, kilit, dış cep analizi
+- **Gelişmiş Arama**: Global search, group-based search, multi-image query
+- **HEIC Desteği**: iPhone ve modern cihazlardan HEIC/HEIF formatı desteği
+- **AI Maskeleme**: SAM (Segment Anything Model) ile otomatik bagaj tespiti ve arka plan kaldırma
 
 ## AI Maskeleme Sistemi
 LBS5, görüntülerdeki bagajları otomatik tespit edip arka planı kaldıran gelişmiş bir maskeleme sistemi içerir:
@@ -73,7 +73,7 @@ python main.py batch --input data/queries/ --output data/results/
 
 ## İş Akışı
 ```
-📸 Orijinal Fotoğraf → 🤖 AI Maskeleme → 🔍 Özellik Analizi → 🎯 Arama & Eşleştirme
+Orijinal Fotoğraf → AI Maskeleme → Özellik Analizi → Arama & Eşleştirme
 ```
 
 1. **Maskeleme**: SAM ile bagaj tespiti ve arka plan kaldırma
@@ -95,15 +95,15 @@ lbs5/
 │   ├── core/           # Ana sistem bileşenleri
 │   ├── analyzers/      # Analiz modülleri
 │   ├── search/         # Arama algoritmaları
-│   ├── mask/           # 🆕 AI maskeleme sistemi
+│   ├── mask/           # AI maskeleme sistemi
 │   └── utils/          # Yardımcı fonksiyonlar
 ├── data/
 │   ├── input/          # Orijinal bagaj fotoğrafları
-│   ├── input-masked/   # 🆕 Maskelenmiş fotoğraflar
+│   ├── input-masked/   # Maskelenmiş fotoğraflar
 │   ├── gallery/        # Referans bagaj fotoğrafları
 │   ├── queries/        # Sorgu fotoğrafları
 │   └── results/        # Analiz sonuçları
-├── scripts/            # 🆕 CLI araçları
+├── scripts/            # CLI araçları
 │   └── mask_luggage.py # Maskeleme CLI
 ├── tests/              # Test dosyaları
 ├── config/             # Konfigürasyon dosyaları

@@ -130,7 +130,7 @@ def main():
         # İstatistikleri göster
         if args.stats:
             stats = processor.get_statistics()
-            print("\n📊 LBS Maskeleme İstatistikleri:")
+            print("\nLBS Maskeleme İstatistikleri:")
             print(f"├── Giriş klasörü: {args.input_dir}")
             print(f"├── Çıktı klasörü: {args.output_dir}")
             print(f"├── Giriş dosyaları: {stats['input_files']}")
@@ -142,16 +142,16 @@ def main():
         if args.clear_output:
             logger.info("Çıktı klasörü temizleniyor...")
             if processor.clear_output_directory():
-                logger.info("✅ Çıktı klasörü temizlendi")
+                logger.info("Çıktı klasörü temizlendi")
             else:
-                logger.error("❌ Çıktı klasörü temizlenemedi")
+                logger.error("Çıktı klasörü temizlenemedi")
                 return 1
         
         # Ana işlemi başlat
-        logger.info("🎯 Bagaj maskeleme işlemi başlıyor...")
-        logger.info(f"📁 Giriş: {args.input_dir}")
-        logger.info(f"📁 Çıktı: {args.output_dir}")
-        logger.info(f"🤖 Model: {args.model_type} ({args.device})")
+        logger.info("Bagaj maskeleme işlemi başlıyor...")
+        logger.info(f"Giriş: {args.input_dir}")
+        logger.info(f"Çıktı: {args.output_dir}")
+        logger.info(f"Model: {args.model_type} ({args.device})")
         
         results = processor.process_all_images(
             overwrite=args.overwrite,
@@ -160,31 +160,31 @@ def main():
         )
         
         # Sonuçları göster
-        print(f"\n📈 İşlem Sonuçları:")
+        print(f"\nİşlem Sonuçları:")
         print(f"├── Toplam dosya: {results['total_files']}")
         print(f"├── Başarılı: {results['success_count']}")
         print(f"├── Atlanan: {len(results['skipped'])}")
         print(f"└── Hatalı: {len(results['errors'])}")
         
         if results['errors']:
-            print("\n❌ Hatalar:")
+            print("\nHatalar:")
             for error in results['errors'][:5]:  # İlk 5 hatayı göster
                 print(f"   • {Path(error['file']).name}: {error['error']}")
             if len(results['errors']) > 5:
                 print(f"   ... ve {len(results['errors']) - 5} hata daha")
         
         if results['success_count'] > 0:
-            logger.info("✅ Maskeleme işlemi tamamlandı!")
+            logger.info("Maskeleme işlemi tamamlandı!")
             return 0
         else:
-            logger.error("❌ Hiçbir dosya işlenemedi")
+            logger.error("Hiçbir dosya işlenemedi")
             return 1
             
     except KeyboardInterrupt:
-        logger.info("\n⏹️  İşlem kullanıcı tarafından iptal edildi")
+        logger.info("\nİşlem kullanıcı tarafından iptal edildi")
         return 1
     except Exception as e:
-        logger.error(f"❌ Kritik hata: {e}")
+        logger.error(f"Kritik hata: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()

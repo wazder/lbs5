@@ -27,11 +27,21 @@
     "sam_config": {
       "model_type": "vit_h",
       "device": "auto",
-      "confidence_threshold": 0.5
+      "confidence_threshold": 0.3
     },
     "fallback_methods": {
       "rembg": true,
       "simple_edge": true
+    },
+    "luggage_optimization": {
+      "multi_point_strategy": true,
+      "combine_masks": true,
+      "enhanced_fallback": true,
+      "area_filter": {
+        "min_ratio": 0.05,
+        "max_ratio": 0.9
+      },
+      "aspect_ratio_limit": 3.0
     },
     "output": {
       "save_masks": true,
