@@ -174,9 +174,8 @@ class SAMDetector:
             return self._simple_detection(image)
     
     def _simple_detection(self, image: np.ndarray) -> np.ndarray:
-    def _simple_detection(self, image: np.ndarray) -> np.ndarray:
         """
-        Basit tespit
+        Bast Tespit
         """
         # Gri tonlamalı resme çevir
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

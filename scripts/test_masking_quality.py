@@ -23,10 +23,10 @@ def test_masking_quality(image_path: str, output_dir: str = "test_results"):
     """
     Maskeleme kalitesini farklı parametrelerle test eder
     """
-    print(f"🧪 VALİZ MASKELEME KALİTE TESTİ")
-    print(f"📁 Test resmi: {image_path}")
-    print("=" * 50)
-    
+    print(f"VALİZ MASKELEME KALİTE TESTİ")
+    print(f"Test resmi: {image_path}")
+    print(50)
+
     # Çıktı klasörünü oluştur
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
@@ -34,7 +34,7 @@ def test_masking_quality(image_path: str, output_dir: str = "test_results"):
     # Orijinal resmi yükle
     original = cv2.imread(image_path)
     if original is None:
-        print(f"❌ Resim yüklenemedi: {image_path}")
+        print(f"Resim yüklenemedi: {image_path}")
         return
     
     h, w = original.shape[:2]
@@ -109,12 +109,12 @@ def test_masking_quality(image_path: str, output_dir: str = "test_results"):
                 }
                 results.append(result)
                 
-                print(f"   ✅ Başarılı - {process_time:.2f}s")
-                print(f"   📊 Kaplama: %{quality_metrics['coverage']*100:.1f}")
-                print(f"   🎯 Kenar kalitesi: {quality_metrics['edge_quality']:.3f}")
+                print(f"   Başarılı - {process_time:.2f}s")
+                print(f"   Kaplama: %{quality_metrics['coverage']*100:.1f}")
+                print(f"   Kenar kalitesi: {quality_metrics['edge_quality']:.3f}")
                 
             else:
-                print(f"   ❌ Mask oluşturulamadı")
+                print(f"   Mask oluşturulamadı")
                 results.append({
                     "config": config,
                     "process_time": process_time,
@@ -122,7 +122,7 @@ def test_masking_quality(image_path: str, output_dir: str = "test_results"):
                 })
                 
         except Exception as e:
-            print(f"   💥 Hata: {e}")
+            print(f"   Hata: {e}")
             results.append({
                 "config": config,
                 "error": str(e),
@@ -139,14 +139,14 @@ def test_masking_quality(image_path: str, output_dir: str = "test_results"):
         best_result = max(successful_results, 
                          key=lambda x: x["quality"]["coverage"])
         
-        print(f"\n🏆 EN İYİ SONUÇ:")
+        print(f"\nEN İYİ SONUÇ:")
         print(f"   Konfigürasyon: {best_result['config']['name']}")
         print(f"   Kaplama: %{best_result['quality']['coverage']*100:.1f}")
         print(f"   Süre: {best_result['process_time']:.2f}s")
         
         return best_result['config']
     else:
-        print(f"\n❌ Hiçbir test başarılı olmadı")
+        print(f"\nHiçbir test başarılı olmadı")
         return None
 
 def evaluate_mask_quality(original: np.ndarray, mask: np.ndarray) -> dict:
@@ -241,16 +241,16 @@ def batch_test_directory(input_dir: str, output_dir: str = "batch_test_results")
         image_files.extend(input_path.glob(f"*{fmt}"))
         image_files.extend(input_path.glob(f"*{fmt.upper()}"))
     
-    print(f"🗂️  {len(image_files)} resim dosyası bulundu")
+    print(f" {len(image_files)} resim dosyası bulundu")
     
     if not image_files:
-        print("❌ Hiç resim dosyası bulunamadı")
+        print("Hiç resim dosyası bulunamadı")
         return
     
     # Her resim için test
     all_results = {}
     for i, image_file in enumerate(image_files, 1):
-        print(f"\n📸 [{i}/{len(image_files)}] {image_file.name}")
+        print(f"\n[{i}/{len(image_files)}] {image_file.name}")
         
         file_output_dir = output_path / image_file.stem
         best_config = test_masking_quality(str(image_file), str(file_output_dir))
